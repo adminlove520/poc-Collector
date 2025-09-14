@@ -42,10 +42,10 @@ def clone_repos(urls):
 
 if __name__=="__main__":
     # 更新路径引用
-    if os.path.exists(os.path.join(cwd,"..","PocOrExp_in_Github")):
-        cmd = "cd %s && git pull"%os.path.join(cwd,"..","PocOrExp_in_Github")
+    if os.path.exists(os.path.join(cwd,"..","poc-Collector")):
+        cmd = "cd %s && git pull"%os.path.join(cwd,"..","poc-Collector")
     else:
-        cmd = "cd %s && git clone %s" % (os.path.join(cwd,".."),"https://github.com/ycdxsb/PocOrExp_in_Github")
+        cmd = "cd %s && git clone %s" % (os.path.join(cwd,".."),"https://github.com/adminlove520/poc-Collector")
     os.system(cmd)
     if not os.path.exists(repo_root):
         os.mkdir(repo_root)

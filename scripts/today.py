@@ -46,23 +46,26 @@ def parse_readme(content):
     return poc_or_exps,cve_ids
 
 def get_today_update():
-    status,output = subprocess.getstatusoutput('rm -rf PocOrExp_in_Github')
-    status,output = subprocess.getstatusoutput('git clone git@github.com:ycdxsb/PocOrExp_in_Github.git PocOrExp_in_Github')
-    status,output = subprocess.getstatusoutput('cd PocOrExp_in_Github && git tag --sort=committerdate')
+    status,output = subprocess.getstatusoutput('rm -rf poc-Collector')
+    status,output = subprocess.getstatusoutput('git clone git@github.com:adminlove520/poc-Collector.git poc-Collector')
+    status,output = subprocess.getstatusoutput('cd poc-Collector && git tag --sort=committerdate')
     tags = output.split('\n')
     print(tags)
-    if(tags[-1]!=datetime.datetime.now().strftime('%Y%m%d')):
+    if(tags and tags[-1]!=datetime.datetime.now().strftime('%Y%m%d')):
         print('date info error')
         exit(-1)
     old_poc_or_exps = []
     new_poc_or_exps = []
-    status,output = subprocess.getstatusoutput('cd PocOrExp_in_Github && git checkout %s' % tags[-2])
-    with open('PocOrExp_in_Github/PocOrExp.md') as f:
-        content = f.read().split('\n')
-    content = [line for line in content if line!='']
-    old_poc_or_exps,old_cve_ids = parse_readme(content)
-    status,output = subprocess.getstatusoutput('cd PocOrExp_in_Github && git checkout %s' % tags[-1])
-    with open('PocOrExp_in_Github/PocOrExp.md') as f:
+    if len(tags) > 1:
+        status,output = subprocess.getstatusoutput('cd poc-Collector && git checkout %s' % tags[-2])
+        with open('poc-Collector/PocOrExp.md') as f:
+            content = f.read().split('\n')
+        content = [line for line in content if line!='']
+        old_poc_or_exps,old_cve_ids = parse_readme(content)
+    else:
+        old_cve_ids = []
+    status,output = subprocess.getstatusoutput('cd poc-Collector && git checkout %s' % tags[-1])
+    with open('poc-Collector/PocOrExp.md') as f:
         content = f.read().split('\n')
     content = [line for line in content if line!='']
     new_poc_or_exps,new_cve_ids = parse_readme(content)
