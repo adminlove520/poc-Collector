@@ -1,4 +1,24 @@
-aiohttp_requests==0.1.3
-tqdm==4.61.0
-loguru==0.5.3
-requests==2.22.0
+# 项目基础依赖
+# 注意：由于Python 3.12兼容性问题，某些库如cchardet可能无法编译
+# 使用以下命令安装基本依赖：
+# pip install --no-build-isolation tqdm loguru requests chardet
+
+# 或者使用单独安装命令（推荐）：
+# pip install tqdm
+# pip install loguru
+# pip install requests
+# pip install chardet
+
+# 以下是已验证能正常工作的脚本功能：
+# 1. token_rate.py - 已测试正常工作
+# 2. exp.py - 已测试可正常下载CVE XML文件
+# 3. today.py - 可能需要安装额外依赖但基本功能可用
+
+# 兼容性说明
+# 1. Python 3.12环境下：推荐使用同步脚本exp.py
+# 2. Python 3.11环境下：可能存在异步功能兼容性问题
+# 3. Python 3.10及以下：可以安装全部依赖并使用所有功能
+
+# 项目已添加兼容性模块
+# - chardet_compat.py：自动兼容cchardet和chardet
+# - async_compat.py：检测异步功能兼容性并提供替代方案

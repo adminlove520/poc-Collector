@@ -9,10 +9,12 @@ from random import sample
 from tqdm import tqdm
 from loguru import logger
 
-# 文件路径现在需要相对于scripts目录
-DOWNLOAD_DIR = '../download'
-TOKEN_FILE = '../config/TOKENS'
-BLACKLIST_FILE = '../config/blacklist.txt'
+# 使用绝对路径确保正确找到文件
+sCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(sCRIPTS_DIR, '..'))
+DOWNLOAD_DIR = os.path.join(PROJECT_ROOT, 'download')
+TOKEN_FILE = os.path.join(PROJECT_ROOT, 'config', 'TOKENS')
+BLACKLIST_FILE = os.path.join(PROJECT_ROOT, 'config', 'blacklist.txt')
 tokens = []
 blacklist = []
 

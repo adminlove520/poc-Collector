@@ -9,12 +9,40 @@ from tqdm import tqdm
 from loguru import logger
 import asyncio
 import requests
-from aiohttp_requests import requests as aio_requests
+import warnings
+import sys
 
-# 文件路径现在需要相对于scripts目录
-DOWNLOAD_DIR = '../download'
-TOKEN_FILE = '../config/TOKENS'
-BLACKLIST_FILE = '../config/blacklist.txt'
+# 导入异步兼容性模块
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from async_compat import async_compat, check_async_compatibility
+
+# 检查异步兼容性
+compatibility_result = check_async_compatibility()
+if not compatibility_result['compatible']:
+    warnings.warn(compatibility_result['recommendation'])
+    warnings.warn("❌ 异步功能可能不可用，建议使用同步脚本exp.py")
+
+try:
+    # 尝试获取异步请求对象
+    aio_requests = async_compat.get_requests()
+    if not aio_requests:
+        # 如果没有异步支持，使用requests替代
+        aio_requests = None
+        warnings.warn("⚠️ 无法获取异步请求对象，将使用同步请求")
+except Exception as e:
+    aio_requests = None
+    warnings.warn(f"⚠️ 获取异步请求对象时出错: {str(e)}")
+
+# 确保导入json模块
+import json
+
+# 使用绝对路径确保正确找到文件
+import os
+sCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(sCRIPTS_DIR, '..'))
+DOWNLOAD_DIR = os.path.join(PROJECT_ROOT, 'download')
+TOKEN_FILE = os.path.join(PROJECT_ROOT, 'config', 'TOKENS')
+BLACKLIST_FILE = os.path.join(PROJECT_ROOT, 'config', 'blacklist.txt')
 tokens = []
 blacklist = []
 
@@ -113,14 +141,28 @@ async def get_PocOrExp_in_github(CVE_ID,Other_ID = None,token=None):
     while(True):
         time.sleep(windows)
         headers = {"Authorization": "token "+token}
-        req = await aio_requests.get(api,headers = headers)
-        req = await req.text()
-        req = json.loads(req)
-        logger.info("CVE_ID: %s , token: %s"%(CVE_ID, token))
-        if('items' in req):
-            items = req['items']
-            break
-        else:
+        
+        try:
+            if aio_requests:
+                # 使用异步请求
+                req = await aio_requests.get(api,headers = headers)
+                req = await req.text()
+            else:
+                # 使用同步请求替代
+                warnings.warn(f"⚠️ 使用同步请求替代异步请求: {CVE_ID}")
+                req = requests.get(api, headers=headers, timeout=60)
+                req = req.text
+            
+            req = json.loads(req)
+            logger.info("CVE_ID: %s , token: %s"%(CVE_ID, token))
+            if('items' in req):
+                items = req['items']
+                break
+            else:
+                token = sample(tokens,1)[0]
+                windows += 0.1
+        except Exception as e:
+            logger.error(f"请求错误: {str(e)}")
             token = sample(tokens,1)[0]
             windows += 0.1
     PocOrExps = []
