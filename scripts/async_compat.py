@@ -8,6 +8,7 @@
 import sys
 import importlib
 import warnings
+import requests
 
 
 class AsyncCompat:

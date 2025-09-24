@@ -20,7 +20,10 @@ def render_today(update):
             string.append(" ".join([link,stars,forks]))
         string.append('\n')
     # 更新Today.md的路径，现在应该放在docs目录下
-    with open("../docs/Today.md",'w') as f:
+    # 使用绝对路径确保正确找到文件
+    docs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'docs'))
+    today_path = os.path.join(docs_dir, 'Today.md')
+    with open(today_path, 'w') as f:
         f.write("\n".join(string))
     return string
 
@@ -47,7 +50,7 @@ def parse_readme(content):
 
 def get_today_update():
     status,output = subprocess.getstatusoutput('rm -rf poc-Collector')
-    status,output = subprocess.getstatusoutput('git clone git@github.com:adminlove520/poc-Collector.git poc-Collector')
+    status,output = subprocess.getstatusoutput('git clone https://github.com/adminlove520/poc-Collector.git poc-Collector')
     status,output = subprocess.getstatusoutput('cd poc-Collector && git tag --sort=committerdate')
     tags = output.split('\n')
     print(tags)

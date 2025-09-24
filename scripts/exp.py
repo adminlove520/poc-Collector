@@ -27,7 +27,7 @@ def download_cve_xml(filename):
             f.write(chunk)
 
 def download_cve_xml_all():
-    filenames = ["allitems-cvrf-year-%d.xml"%year for year in range(2020,datetime.datetime.now().year+1)]
+    filenames = ["allitems-cvrf-year-%d.xml"%year for year in range(2020,2026)]
     for filename in filenames:
         download_cve_xml(filename)
    
@@ -86,13 +86,16 @@ def generate_markdown_year(year):
 
 def generate_markdown():
     PocOrExps = []
-    for year in list(range(2020, datetime.datetime.now().year+1))[::-1]:
+    for year in list(range(2020, 2026))[::-1]:
         string = generate_markdown_year(year)
         PocOrExps.append('## %d' % year)
         PocOrExps = PocOrExps + string
         PocOrExps.append('\n')
     # 更新PocOrExp.md的路径，现在应该放在docs目录下
-    with open('../docs/PocOrExp.md','w') as f:
+    # 使用绝对路径确保正确找到文件
+    docs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'docs'))
+    poc_or_exp_path = os.path.join(docs_dir, 'PocOrExp.md')
+    with open(poc_or_exp_path, 'w') as f:
         tmp = '\n'.join(PocOrExps)
         tmp = tmp.replace("<","").replace(">","")
         f.write(tmp)
@@ -143,7 +146,7 @@ def get_PocOrExp_in_github(CVE_ID,Other_ID = None):
 def parse_arg():
     parser = argparse.ArgumentParser(
         description='CVE Details and Collect PocOrExp in Github')
-    parser.add_argument('-y', '--year',required=False,default=None, choices=list(map(str,range(2020,datetime.datetime.now().year+1)))+['all'],
+    parser.add_argument('-y', '--year',required=False,default=None, choices=list(map(str,range(2020,2026)))+['all'],
                         help="get Poc or CVE of certain year or all years")
     parser.add_argument('-i','--init',required=False,default='n',choices=['y','n'],help = "init or not")
     parser.add_argument('-w','--watch',required=False,default='n',choices = ['y','n'],help = "keep an eye on them or not")
@@ -221,15 +224,17 @@ def process_cve_year(year,init = True):
     generate_markdown()
     
 def process_cve_all(init = True):
-    for year in list(range(2020,datetime.datetime.now().year+1))[::-1]:
+    for year in list(range(2020,2026))[::-1]:
         process_cve_year(year,init)
 
 def init():
     # 更新日志文件路径
-    logger.add('../PocOrExps.log',format="{time} {level} {message}",rotation="10 MB")
+    # 使用绝对路径确保正确找到文件
+    log_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'PocOrExps.log'))
+    logger.add(log_file, format="{time} {level} {message}", rotation="10 MB")
     if(not os.path.exists(DOWNLOAD_DIR)):
         os.mkdir(DOWNLOAD_DIR)
-    for year in range(2020, datetime.datetime.now().year+1):
+    for year in range(2020, 2026):
         if(not os.path.exists(str(year))):
             os.mkdir(str(year))
     if(not os.path.exists(TOKEN_FILE)):
@@ -274,10 +279,10 @@ def watch():
     对今年以前的有Exp的CVE进行更新
     对今年的CVE全部更新
     '''
-    for year in list(range(2020,datetime.datetime.now().year))[::-1]:
+    for year in list(range(2020,2025))[::-1]:
         update_year(year)
         generate_markdown()
-    process_cve_year(datetime.datetime.now().year,False)
+    process_cve_year(2025,False)
     generate_markdown()
 
 def main():
